@@ -19,8 +19,14 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 
 urlpatterns = [
+    
     path("admin/", admin.site.urls),
     path("api/properties/", include("properties.urls")),  # Properties app
     path("api/auth/", include("authentication.urls")), # Authentication app
+    path("api/tenants/", include("tenants.urls")), # Tenants app
+    path("api/leases/", include("leases.urls")), # Leases app 
+    path("api/payments/", include("payments.urls")), # Payments app
+
     path("", RedirectView.as_view(url="admin/")),  # Redirect root to Admin
+
 ]
