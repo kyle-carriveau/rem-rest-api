@@ -17,6 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Real Estate Management API",
+        default_version="v1",
+    ),
+    public=True,
+)
 
 urlpatterns = [
     
@@ -26,7 +36,7 @@ urlpatterns = [
     path("api/tenants/", include("tenants.urls")), # Tenants app
     path("api/leases/", include("leases.urls")), # Leases app 
     path("api/payments/", include("payments.urls")), # Payments app
-
+    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-ui"),
     path("", RedirectView.as_view(url="admin/")),  # Redirect root to Admin
 
 ]

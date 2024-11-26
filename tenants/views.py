@@ -9,17 +9,24 @@ class TenantListCreateView(ListCreateAPIView):
     serializer_class = TenantSerializer
 
     def get_queryset(self):
-        # Filter tenants by the current user
-        return Tenant.objects.filter(created_by=self.request.user)
+        # Optimize by fetching related property and user in a single query
+        return (
+            Tenant.objects.filter(created_by=self.request.user)
+            .select_related("assigned_property", "created_by")
+        )
 
     def perform_create(self, serializer):
         # Automatically associate the tenant with the current user
         serializer.save(created_by=self.request.user)
+
 
 class TenantDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TenantSerializer
 
     def get_queryset(self):
-        # Filter tenants by the current user
-        return Tenant.objects.filter(created_by=self.request.user)
+        # Apply the same optimization for detail view
+        return (
+            Tenant.objects.filter(created_by=self.request.user)
+            .select_related("assigned_property", "created_by")
+        )
