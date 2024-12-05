@@ -1,10 +1,21 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Payment
 from .serializers import PaymentSerializer
 from .filters import PaymentFilter
+from authentication.permissions import IsPropertyManager, IsTenant
+
+class PaymentListView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsTenant]  # Restrict to Tenants
+    serializer_class = PaymentSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ["payment_date", "amount"]  # Example filters
+    ordering_fields = ["payment_date", "amount"]
+
+    def get_queryset(self):
+        return Payment.objects.filter(tenant=self.request.user)
 
 class PaymentListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -21,7 +32,6 @@ class PaymentListCreateView(ListCreateAPIView):
             .select_related("lease", "tenant")  # Optimize foreign key relationships
             .prefetch_related("lease__property")  # Prefetch related property for lease
         )
-
 
 class PaymentDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
